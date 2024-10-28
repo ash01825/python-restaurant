@@ -11,7 +11,7 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user = db_session.query(User).filter_by(username=email, password=password).first()
+        user = db_session.query(Users).filter_by(username=email, password=password).first()
         
         if user:
             session['user_id'] = user.id
