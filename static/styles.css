@@ -1,0 +1,53 @@
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(to right, #6a11cb, #2575fc); /* Gradient background */
+}
+
+.auth-container {
+    background: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    max-width: 400px; /* Max width for better responsiveness */
+    width: 100%; /* Full width for smaller screens */
+}
+
+h3 {
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+p.text-center {
+    margin-top: 1.5rem;
+    color: #6c757d;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
