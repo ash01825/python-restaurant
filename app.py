@@ -1,65 +1,77 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-from models import User, session as db_session
-import random
+from flask import Flask, render_template, redirect, url_for, request, flash
+from models import User, MenuItem, Order, session
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Ensure this is secure in production
+app.secret_key = 'supersecretkey'
 
-# Route for the login page
+# Home route
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        user = db_session.query(Users).filter_by(username=email, password=password).first()
-        
+        user = session.query(User).filter_by(email=email, password=password).first()
         if user:
-            session['user_id'] = user.id
-            flash("Login successful!")
-            return redirect(url_for('dashboard'))  # Redirect to the dashboard or homepage
+            return redirect(url_for('index'))
         else:
-            flash("Invalid email or password")
-            return redirect(url_for('login'))
+            flash("Invalid credentials")
     return render_template('login.html')
 
-# Route for the registration page
+# Register route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        name = request.form['name']
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
-        
-        # Check if user already exists
-        existing_user = db_session.query(User).filter_by(username=email).first()
-        if existing_user:
-            flash("User already exists. Please login.")
-            return redirect(url_for('login'))
-        
-        # Register new user and generate OTP
-        new_user = User(username=email, password=password, role='Customer')  # Assuming role as Customer
+        new_user = User(username=username, email=email, password=password, role="Customer")
         new_user.save()
-        session['otp'] = random.randint(1000, 9999)  # Simple OTP generation
-        session['temp_user_id'] = new_user.id  # Temporary ID until OTP is verified
-        
-        flash("OTP has been sent to your email. Please verify.")
         return redirect(url_for('otp_verification'))
     return render_template('register.html')
 
-# Route for OTP verification page
+# OTP verification route
 @app.route('/otp', methods=['GET', 'POST'])
 def otp_verification():
     if request.method == 'POST':
-        entered_otp = request.form['otp']
-        
-        # Check OTP correctness
-        if int(entered_otp) == session.get('otp'):
-            user_id = session.pop('temp_user_id', None)
-            flash("Registration successful!")
-            return redirect(url_for('login'))
-        else:
-            flash("Invalid OTP. Please try again.")
-    return render_template('otp_verification.html')
+        otp = request.form['otp']
+        # OTP verification logic here
+        return redirect(url_for('index'))
+    return render_template('otp.html')
 
-if __name__ == "__main__":
+# View menu
+@app.route('/menu')
+def show_menu():
+    menu_items = session.query(MenuItem).all()
+    return render_template('menu.html', menu_items=menu_items)
+
+# Place order
+@app.route('/order/<int:item_id>', methods=['POST'])
+def place_order(item_id):
+    new_order = Order(customer_id=1, status="Pending")  # Example with customer_id = 1
+    new_order.save()
+    return redirect(url_for('order_confirmation'))
+
+# Order confirmation
+@app.route('/order_confirmation')
+def order_confirmation():
+    return render_template('order_confirmation.html')
+
+# Manager dashboard
+@app.route('/manager_dashboard')
+def manager_dashboard():
+    orders = session.query(Order).all()
+    return render_template('manager_dashboard.html', orders=orders)
+
+# Delivery agent orders
+@app.route('/delivery_orders')
+def delivery_orders():
+    orders = session.query(Order).filter_by(status="Pending").all()
+    return render_template('delivery_orders.html', orders=orders)
+
+if __name__ == '__main__':
     app.run(debug=True)
